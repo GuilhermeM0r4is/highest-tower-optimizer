@@ -113,11 +113,7 @@ impl SegmentTree {
     }
 }
 
-mod tester;
-
 fn main() {
-
-    tester::run_benchmark_tests();
 
     // vector where all different blocks will be stored
     let mut block_vec: Vec<Block> = Vec::new();
