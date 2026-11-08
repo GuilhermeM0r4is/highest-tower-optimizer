@@ -113,7 +113,11 @@ impl SegmentTree {
     }
 }
 
+mod tester;
+
 fn main() {
+
+    tester::run_benchmark_tests();
 
     // vector where all different blocks will be stored
     let mut block_vec: Vec<Block> = Vec::new();
@@ -222,6 +226,15 @@ fn search_for_highest(vec: &mut Vec<Block>) {
                         &mut max_overall_h, &mut best_end_block);
 }
 
+/// Auxiliar function that loops in O(NlogN) inside a SegmentTree.
+///
+/// [c_width]: New given index of the compressed widths vector;
+/// [n_width]: Amount of widths inside the tree to search;
+/// [tree]: Segment Tree to look inside;
+/// [parent]: Parent vector containing all the path for the children;
+/// [max_ovrll_h]: Biggest height value found until now;
+/// [best_end_b]: Best block for the ending (top) of tower.
+///
 /// Auxiliar function that loops in O(NlogN) inside a SegmentTree.
 ///
 /// [c_width]: New given index of the compressed widths vector;
