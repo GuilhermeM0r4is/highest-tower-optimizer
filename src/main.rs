@@ -200,26 +200,51 @@ fn order_and_clean_vec(vec: &mut Vec<Block>) {
 ///
 fn search_for_highest(vec: &mut Vec<Block>) {
 
-    // assures vector not empty and parses as usize value
-    let max_width = vec.iter()
-                        .map(|b| b.width)
-                        .max()
-                        .unwrap_or(0) as usize;
+    // assures memory optimization for trees, storing only indexes
+    let mut widths: Vec<u32> =
+            vec.iter()
+                .map(|b| b.width)
+                .collect();
 
-    let mut tree: SegmentTree = SegmentTree::new(max_width);
+    widths.sort_unstable();
+    widths.dedup();
+
+    let n_widths = widths.len();
+
+    let mut tree: SegmentTree = SegmentTree::new(n_widths);
 
     // a vector containing all parents path so we can search it
     let mut parent: Vec<usize> = vec![usize::MAX; vec.len()];
     let mut max_overall_h: u32 = 0;
     let mut best_end_block: usize = 0;
 
+    search_inside_tree(vec, widths, n_widths, &mut tree, &mut parent,
+                        &mut max_overall_h, &mut best_end_block);
+}
+
+/// Auxiliar function that loops in O(NlogN) inside a SegmentTree.
+///
+/// [c_width]: New given index of the compressed widths vector;
+/// [n_width]: Amount of widths inside the tree to search;
+/// [tree]: Segment Tree to look inside;
+/// [parent]: Parent vector containing all the path for the children;
+/// [max_ovrll_h]: Biggest height value found until now;
+/// [best_end_b]: Best block for the ending (top) of tower.
+///
+fn search_inside_tree(vec: &mut Vec<Block>, widths: Vec<u32>, n_widths: usize,
+                        tree: &mut SegmentTree, parent: &mut Vec<usize>,
+                        max_ovrll_h: &mut u32, best_end_b: &mut usize) {
+
     // search O(N), for each element as top of the tower
     for (i, block) in vec.iter().enumerate() {
 
+        let c_width: usize =
+            widths.binary_search(&block.width).unwrap();
+
         // updates the best height with the tree query info
         let (best_prev_h, best_idx): (u32, usize) =
-            tree.query(1, 0, max_width,
-                        block.width as usize + 1, max_width);
+            tree.query(1, 0, n_widths - 1,
+                        c_width + 1, n_widths - 1);
 
         // if not usize::MAX then we found a valid block
         if best_idx != usize::MAX {
@@ -229,15 +254,15 @@ fn search_for_highest(vec: &mut Vec<Block>) {
         // the block size of this tower is the sum of this + best
         let t_height: u32 = block.height + best_prev_h;
 
-        if t_height > max_overall_h {
-            max_overall_h = t_height;
-            best_end_block = i;
+        if t_height > *max_ovrll_h {
+            *max_ovrll_h = t_height;
+            *best_end_b = i;
         }
 
         // update to know the biggest tower value
-        tree.update(1, 0, max_width, block.width as usize, (t_height, i));
+        tree.update(1, 0, n_widths - 1, c_width, (t_height, i));
     }
-    reconstruct_tower(vec, &parent, best_end_block, max_overall_h);
+    reconstruct_tower(vec, &parent, *best_end_b, *max_ovrll_h);
 }
 
 /// Gets the best ending block info, the highest height we found up until now
