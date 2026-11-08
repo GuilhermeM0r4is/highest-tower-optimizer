@@ -43,7 +43,7 @@ impl SegmentTree {
     /// Creates a new tree with all values set to 0
     fn new(n: usize) -> Self {
         SegmentTree {
-            tree: vec![(0, usize::MAX); n * 4]
+            tree: vec![(0, usize::MAX); (n + 1) * 4]
         }
     }
 
@@ -121,12 +121,17 @@ fn main() {
 
     /* reads the line from input given from the user
        handling any failure during the process */
-    io::stdin()
+    if io::stdin()
         .read_line(&mut num_blocks)
-        .expect("Failed to read line");
+        .is_err() {
+            return;
+        }
 
     // turns the String into a usize value to use for the for loop
-    let num_blocks: u32 = num_blocks.trim().parse().expect("Please type a number!");
+    let num_blocks: u32 = match num_blocks.trim().parse() {
+        Ok(n) => n,
+        Err(_) => return,
+    };
 
     fill_vec_from_input(&mut block_vec, num_blocks);
     order_and_clean_vec(&mut block_vec);
