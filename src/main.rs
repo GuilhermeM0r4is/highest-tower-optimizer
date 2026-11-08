@@ -266,10 +266,10 @@ fn search_inside_tree(vec: &mut Vec<Block>, widths: Vec<u32>, n_widths: usize,
 
             // if not usize::MAX we found a valid block
             if best_idx != usize::MAX {
-                parent[i] = best_idx;
+                parent[j] = best_idx;
             }
 
-            let t_height = vec[i].height + best_prev_h;
+            let t_height = vec[j].height + best_prev_h;
 
             if t_height > *max_ovrll_h {
                 *max_ovrll_h = t_height;
