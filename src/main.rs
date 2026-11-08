@@ -242,9 +242,17 @@ fn search_inside_tree(vec: &mut Vec<Block>, widths: Vec<u32>, n_widths: usize,
             widths.binary_search(&block.width).unwrap();
 
         // updates the best height with the tree query info
-        let (best_prev_h, best_idx): (u32, usize) =
+        let (mut best_prev_h, mut best_idx): (u32, usize) =
             tree.query(1, 0, n_widths - 1,
                         c_width + 1, n_widths - 1);
+
+        // if found block doesn't strictly have bigger length
+        if best_idx != usize::MAX &&
+            vec[best_idx].length <= block.length {
+
+            best_prev_h = 0;
+            best_idx = usize::MAX;
+        }
 
         // if not usize::MAX then we found a valid block
         if best_idx != usize::MAX {
@@ -300,7 +308,7 @@ fn reconstruct_tower(vec: &Vec<Block>, parent: &Vec<usize>,
     tower.reverse();
 
     // prints all important information on the building tower
-    println!("{max_h}");
+    println!("{} {}", max_h, tower.len());
     for (_, block) in tower.iter().enumerate() {
         println!("{} {} {}", block.width, block.length, block.height);
     }
