@@ -114,7 +114,7 @@ impl SegmentTree {
 }
 
 fn main() {
-   
+
     // vector where all different blocks will be stored
     let mut block_vec: Vec<Block> = Vec::new();
     let mut num_blocks = String::new();
@@ -244,42 +244,48 @@ fn search_inside_tree(vec: &mut Vec<Block>, widths: Vec<u32>, n_widths: usize,
                         tree: &mut SegmentTree, parent: &mut Vec<usize>,
                         max_ovrll_h: &mut u32, best_end_b: &mut usize) {
 
-    // search O(N), for each element as top of the tower
-    for (i, block) in vec.iter().enumerate() {
+    let n = vec.len();
+    let mut i = 0;
 
-        let c_width: usize =
-            widths.binary_search(&block.width).unwrap();
-
-        // updates the best height with the tree query info
-        let (mut best_prev_h, mut best_idx): (u32, usize) =
-            tree.query(1, 0, n_widths - 1,
-                        c_width + 1, n_widths - 1);
-
-        // if found block doesn't strictly have bigger length
-        if best_idx != usize::MAX &&
-            vec[best_idx].length <= block.length {
-
-            best_prev_h = 0;
-            best_idx = usize::MAX;
+    while i < n {
+        // find the end of the group with the same exact length
+        let mut idx = i;
+        while idx < n && vec[idx].length == vec[i].length {
+            idx += 1;
         }
 
-        // if not usize::MAX then we found a valid block
-        if best_idx != usize::MAX {
-            parent[i] = best_idx;
+        // query for the whole group before inserting values
+        let mut results: Vec<(u32, usize)> = Vec::with_capacity(idx - i);
+
+        for j in i..idx {
+
+            let c_width = widths.binary_search(&vec[j].width).unwrap();
+
+            let (best_prev_h, best_idx) =
+                tree.query(1, 0, n_widths - 1, c_width + 1, n_widths - 1);
+
+            // if not usize::MAX we found a valid block
+            if best_idx != usize::MAX {
+                parent[i] = best_idx;
+            }
+
+            let t_height = vec[i].height + best_prev_h;
+
+            if t_height > *max_ovrll_h {
+                *max_ovrll_h = t_height;
+                *best_end_b = j;
+            }
+            results.push((t_height, j));
         }
 
-        // the block size of this tower is the sum of this + best
-        let t_height: u32 = block.height + best_prev_h;
-
-        if t_height > *max_ovrll_h {
-            *max_ovrll_h = t_height;
-            *best_end_b = i;
+        // now we insert the values into the group
+        for j in i..idx {
+            let c_width = widths.binary_search(&vec[j].width).unwrap();
+            tree.update(1, 0, n_widths - 1, c_width, results[j - i]);
         }
-
-        // update to know the biggest tower value
-        tree.update(1, 0, n_widths - 1, c_width, (t_height, i));
+        i = idx;
     }
-    reconstruct_tower(vec, &parent, *best_end_b, *max_ovrll_h);
+    reconstruct_tower(vec, parent, *best_end_b, *max_ovrll_h);
 }
 
 /// Gets the best ending block info, the highest height we found up until now
