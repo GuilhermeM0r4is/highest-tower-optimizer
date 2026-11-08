@@ -1,0 +1,13 @@
+[package]
+name = "highest-tower-optimizer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[profile.release]
+opt-level = 3            # Optimization
+lto = true               # Optimizes coding between modules
+codegen-units = 1        # Gets everything into one only coding unit
+panic = "abort"          # Removes "unwiding" code of exceptions, chooses binary
+strip = true             # Remove debug binary symbols

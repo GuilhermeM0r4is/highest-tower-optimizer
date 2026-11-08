@@ -1,5 +1,4 @@
 # Highest Tower Optimizer
-
 A program that determines the tallest stable tower that can be built from a set of available block types.
 
 ## Overview

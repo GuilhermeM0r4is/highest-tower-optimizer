@@ -67,3 +67,9 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# project pdf
+*.pdf
+
+# project tester file
+src/tester.rs
